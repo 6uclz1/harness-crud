@@ -24,10 +24,10 @@ jobs:
       contents: read
       pull-requests: write # カバレッジのPRコメント投稿に必要
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
       - run: npm ci
       # 失敗時にどのゲートで落ちたか一目で分かるよう、checkを分解して実行
@@ -84,7 +84,7 @@ jobs:
       pull-requests: write # カバレッジのPRコメント投稿に必要
     services:
       postgres:
-        image: postgres:16-alpine
+        image: postgres:18-alpine
         env:
           POSTGRES_USER: app
           POSTGRES_PASSWORD: app
@@ -99,10 +99,10 @@ jobs:
     env:
       DATABASE_URL: postgres://app:app@localhost:5432/harness_crud
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
       - run: npm ci
       - name: スキーマ反映 (drizzle-kit push)
@@ -121,10 +121,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
       - run: npm ci
       - run: npm run build
