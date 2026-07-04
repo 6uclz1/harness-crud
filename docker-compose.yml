@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:16-alpine
+    image: postgres:18-alpine
     container_name: harness-crud-db
     environment:
       POSTGRES_USER: app
@@ -9,7 +9,8 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      # postgres 18からVOLUME宣言が /var/lib/postgresql に変更された(PGDATAはバージョン固有パス)
+      - pgdata:/var/lib/postgresql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U app -d harness_crud"]
       interval: 2s
