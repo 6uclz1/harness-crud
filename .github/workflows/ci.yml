@@ -20,6 +20,9 @@ jobs:
     name: static gates + unit tests
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: write # カバレッジのPRコメント投稿に必要
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -36,17 +39,49 @@ jobs:
         run: npm run check:ast
       - name: 依存方向・層構造 (dependency-cruiser)
         run: npm run check:deps
+      # ゲートの成否に関わらず、依存グラフ・違反・不安定度メトリクスを毎回job summaryに出す。
+      # 人間がアーキテクチャの腐敗度と現在の依存構造を run ごとに確認するため。
+      - name: 依存関係レポート → job summary (dependency-cruiser)
+        if: always()
+        run: |
+          depcruise() { npx depcruise src --config .dependency-cruiser.cjs --output-type "$1" || true; }
+          {
+            depcruise markdown
+            echo ""
+            echo "### モジュール依存グラフ"
+            echo '```mermaid'
+            depcruise mermaid
+            echo '```'
+            echo ""
+            echo "<details><summary>不安定度メトリクス(I%: 高いほど他への依存過多=変化に弱い)</summary>"
+            echo ""
+            echo '```'
+            depcruise metrics
+            echo '```'
+            echo "</details>"
+          } >> "$GITHUB_STEP_SUMMARY"
       - name: 不使用コード検出 (knip)
         run: npm run check:dead
       - name: 型検査 (tsc)
         run: npm run check:types
-      - name: 単体テスト (vitest)
-        run: npm run test:unit
+      - name: 単体テスト (vitest / カバレッジ計測付き)
+        run: npm run test:unit:coverage
+      # テストが落ちてもカバレッジを可視化する(vitest側は reportOnFailure: true)。
+      # PRでは変更ファイルごとのカバレッジをコメント投稿し、pushではjob summaryに出す。
+      - name: カバレッジレポート → job summary / PRコメント (unit)
+        if: always()
+        uses: davelosert/vitest-coverage-report-action@v2
+        with:
+          name: unit
+          file-coverage-mode: changes
 
   integration:
     name: integration tests (real Postgres)
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: write # カバレッジのPRコメント投稿に必要
     services:
       postgres:
         image: postgres:16-alpine
@@ -72,8 +107,14 @@ jobs:
       - run: npm ci
       - name: スキーマ反映 (drizzle-kit push)
         run: npm run db:push
-      - name: 統合テスト (vitest / 実DB)
-        run: npm run test:integration
+      - name: 統合テスト (vitest / 実DB / カバレッジ計測付き)
+        run: npm run test:integration:coverage
+      - name: カバレッジレポート → job summary / PRコメント (integration)
+        if: always()
+        uses: davelosert/vitest-coverage-report-action@v2
+        with:
+          name: integration
+          file-coverage-mode: changes
 
   build:
     name: next build
