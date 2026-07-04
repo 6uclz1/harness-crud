@@ -1,0 +1,8 @@
+id: no-as-any
+language: typescript
+severity: error
+message: "`as any` は型検査の無効化であり禁止。正しい型を定義するか、外部データなら src/schemas の zod スキーマで parse して型を得ること。"
+files:
+  - "src/**"
+rule:
+  pattern: $EXPR as any

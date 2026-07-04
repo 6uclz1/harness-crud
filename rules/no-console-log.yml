@@ -1,0 +1,8 @@
+id: no-console-log
+language: typescript
+severity: error
+message: console.log の放置は禁止。デバッグ出力なら削除、恒久的なログなら console.error / console.warn を意図を持って使うこと。
+files:
+  - "src/**"
+rule:
+  pattern: console.log($$$ARGS)

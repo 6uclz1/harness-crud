@@ -1,0 +1,89 @@
+# ハーネスのCIガード。
+# ローカルの `npm run check` / `check:full` と同一のゲートを、マージ境界で強制する。
+# ここのステップを削る・条件で飛ばすPRは「ハーネスの後退」であり人間承認必須(docs/GOLDEN_PRINCIPLES.md)。
+name: harness
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: static gates + unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # 失敗時にどのゲートで落ちたか一目で分かるよう、checkを分解して実行
+      - name: format (prettier)
+        run: npm run check:format
+      - name: lint / 複雑度ゲート (eslint + sonarjs)
+        run: npm run check:lint
+      - name: 構文パターン検査 (ast-grep)
+        run: npm run check:ast
+      - name: 依存方向・層構造 (dependency-cruiser)
+        run: npm run check:deps
+      - name: 不使用コード検出 (knip)
+        run: npm run check:dead
+      - name: 型検査 (tsc)
+        run: npm run check:types
+      - name: 単体テスト (vitest)
+        run: npm run test:unit
+
+  integration:
+    name: integration tests (real Postgres)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: app
+          POSTGRES_PASSWORD: app
+          POSTGRES_DB: harness_crud
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U app -d harness_crud"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 15
+    env:
+      DATABASE_URL: postgres://app:app@localhost:5432/harness_crud
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: スキーマ反映 (drizzle-kit push)
+        run: npm run db:push
+      - name: 統合テスト (vitest / 実DB)
+        run: npm run test:integration
+
+  build:
+    name: next build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build

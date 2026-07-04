@@ -1,0 +1,14 @@
+# dependencies / build
+node_modules
+.next
+*.tsbuildinfo
+next-env.d.ts
+
+# env (secrets never committed; use .env.example as the template)
+.env
+.env.local
+.env*.local
+
+# misc
+coverage
+.DS_Store

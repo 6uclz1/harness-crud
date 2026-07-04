@@ -1,0 +1,10 @@
+id: no-process-env
+language: typescript
+severity: error
+message: process.env の直接参照は禁止。src/config/env.ts の env オブジェクトを import して使うこと(未検証の環境変数の上に実装を積まないため)。
+files:
+  - "src/**"
+ignores:
+  - "src/config/env.ts"
+rule:
+  pattern: process.env.$KEY

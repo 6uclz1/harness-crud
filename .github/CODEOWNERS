@@ -1,0 +1,7 @@
+# ハーネス本体の変更は人間のレビューを必須にする(ユーザー名に置き換えてください)
+/rules/                    @YOUR_GITHUB_USERNAME
+/eslint.config.mjs         @YOUR_GITHUB_USERNAME
+/.dependency-cruiser.cjs   @YOUR_GITHUB_USERNAME
+/knip.json                 @YOUR_GITHUB_USERNAME
+/.github/                  @YOUR_GITHUB_USERNAME
+/docs/GOLDEN_PRINCIPLES.md @YOUR_GITHUB_USERNAME

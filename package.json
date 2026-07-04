@@ -1,0 +1,50 @@
+{
+  "name": "harness-crud",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "check": "npm run check:format && npm run check:lint && npm run check:ast && npm run check:deps && npm run check:dead && npm run check:types && npm run test:unit",
+    "check:full": "npm run check && npm run test:integration",
+    "check:format": "prettier --check .",
+    "check:lint": "eslint .",
+    "check:ast": "ast-grep scan src",
+    "check:deps": "depcruise src --config .dependency-cruiser.cjs",
+    "check:dead": "knip",
+    "check:types": "tsc --noEmit",
+    "fix": "prettier --write . && eslint . --fix",
+    "test:unit": "vitest run --project unit",
+    "test:integration": "vitest run --project integration",
+    "db:up": "docker compose up -d --wait",
+    "db:down": "docker compose down",
+    "db:push": "drizzle-kit push",
+    "db:seed": "tsx scripts/seed.ts",
+    "db:reset": "docker compose down -v && docker compose up -d --wait && npm run db:push && npm run db:seed"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.44.2",
+    "next": "^15.3.4",
+    "postgres": "^3.4.7",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "zod": "^3.25.67"
+  },
+  "devDependencies": {
+    "@ast-grep/cli": "^0.38.6",
+    "@types/node": "^22.15.0",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "dependency-cruiser": "^16.10.3",
+    "drizzle-kit": "^0.31.2",
+    "eslint": "^9.29.0",
+    "eslint-plugin-sonarjs": "^3.0.2",
+    "knip": "^5.61.2",
+    "prettier": "^3.5.3",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.35.0",
+    "vitest": "^3.2.4"
+  }
+}

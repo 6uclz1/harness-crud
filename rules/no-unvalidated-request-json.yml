@@ -1,0 +1,17 @@
+id: no-unvalidated-request-json
+language: typescript
+severity: error
+message: リクエストボディを生で読むことは禁止。境界では必ず src/schemas のスキーマで `schema.parse(...)` して型付きデータに変換すること(推測したデータ形状の上に実装を積まないため)。
+files:
+  - "src/app/**"
+rule:
+  any:
+    - pattern: await $REQ.json()
+    - pattern: await $REQ.formData()
+  not:
+    inside:
+      kind: call_expression
+      stopBy: end
+      has:
+        field: function
+        regex: parse
