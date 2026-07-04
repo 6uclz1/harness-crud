@@ -12,3 +12,7 @@ next-env.d.ts
 # misc
 coverage
 .DS_Store
+
+# テスト観点レポートの中間生成物 (scripts/render-test-report.ts / ci.yml 参照)
+vitest-report-*.json
+test-perspectives-*.md

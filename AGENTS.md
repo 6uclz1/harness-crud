@@ -21,6 +21,9 @@ Next.js + Drizzle + Postgres(Docker) のタスク管理CRUD。
    DB起動: `npm run db:up && npm run db:push`
 6. 同じゲートが CI(.github/workflows/ci.yml)でも走る。CIのステップを削除・
    スキップ・条件分岐で回避する変更をしてはならない(人間承認必須)。
+7. PR を作成するときは PR テンプレート(.github/pull_request_template.md)の
+   「結合レベルのテスト観点」を必ず導出して埋める(単体テストでは拾えない、
+   層をまたぐ確認事項)。空のまま提出してはならない。
 
 ## 地図
 
